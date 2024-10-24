@@ -10,7 +10,18 @@ if (!isset($_SESSION['userId']) || !isset($_SESSION['Username'])) {
 
 $username = $_SESSION['Username'];
 $userId = $_SESSION['userId'];
-$_SESSION['Role'] = $row['Role'];
+
+// Fetch user data to get the role
+$sql = "SELECT * FROM tbl4 WHERE Id = ?";
+$stmt = $connection->prepare($sql);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $_SESSION['Role'] = $row['Role']; // Store the role in session
+}
 
 // Define target directory for profile images
 $targetDir = 'uploads/'; // Define your target directory
@@ -24,17 +35,6 @@ foreach ($extensions as $extension) {
         $ProfilePicture = $ProfilePicturePath . '.' . $extension;
         break; // Stop searching once we find the first existing picture
     }
-}
-
-// Fetch user data
-$sql = "SELECT * FROM tbl4 WHERE Id = ?";
-$stmt = $connection->prepare($sql);
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
 }
 
 ?>
@@ -79,7 +79,6 @@ if ($result->num_rows > 0) {
             border-radius: 15px;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
             margin-bottom: 20px;
-            display: flex;
             margin-top: 1rem;
         }
 
@@ -128,13 +127,17 @@ if ($result->num_rows > 0) {
             <ul>
                 <li><a href="Data.php">Database</a></li>
                 <li><a href="Email.php">Email</a></li>
-                <li><a href="#">Terms & Conditions</a></li>
+                <li><a href="T&C.php">Terms & Conditions</a></li>
+                <li><a href="Update_Profile.php">Update Profile</a></li>
                 <li><a href="Login.php">Log Out</a></li>
+                <?php if ($_SESSION['Role'] === 'admin'): ?>
+                    <li><a href="Add_Account.php">Add Account</a></li>
+                <?php endif; ?>
             </ul>
         </nav>
     </header>
     <div class="flex-container">
-        <h1>Welcome Admin, <?php echo htmlspecialchars($username); ?>!</h1>
+        <h1>Welcome Master, <?php echo htmlspecialchars($username); ?>!</h1>
 
         <?php
          $select = mysqli_query($connection, "SELECT * FROM `tbl4` WHERE Id = '$userId'") or die('query failed');
@@ -142,13 +145,11 @@ if ($result->num_rows > 0) {
             $fetch = mysqli_fetch_assoc($select);
          }
          if($fetch['ProfilePicture'] == ''){
-            echo '<img src="images/default-avatar.png">';
+            echo '<img src="images/default-avatar.png" alt="Default Avatar">';
          }else{
-            echo '<img src="uploads/'.$fetch['ProfilePicture'].'"  alt="Profile Image" style="width:200px; height:auto; border-radius: 10px;">';
+            echo '<img src="uploads/'.$fetch['ProfilePicture'].'" alt="Profile Image" style="width:200px; height:auto; border-radius: 10px;">';
          }
       ?>
-
-
     </div>
 </body>
 </html>

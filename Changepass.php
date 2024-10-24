@@ -1,42 +1,64 @@
 <?php
+session_start();
 require('./Database.php');
 
-$editId = $editU = "";
-
-if (isset($_POST['edit'])) {
-    $editId = $_POST['editId'];
-    
-    // Select the record for the given ID
-    $stmt = $connection->prepare("SELECT Username, Password FROM tbl WHERE Id = ?");
-    $stmt->bind_param("i", $editId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result) {
-        $row = $result->fetch_assoc();
-        $editU = $row['Username'];
-    }
+// Check if user is logged in
+if (!isset($_SESSION['userId'])) {
+    header("Location: Login.php");
+    exit();
 }
 
-if (isset($_POST['update'])) {
-    $updateId = $_POST['updateId'];
-    $updateU = $_POST['updateU'];
+$userId = $_SESSION['userId'];
+
+if (isset($_POST['changePassword'])) {
+    $username = $_POST['username'];
+    $currentPassword = $_POST['currentPassword'];
     $newPassword = $_POST['newPassword'];
+    $confirmPassword = $_POST['confirmPassword'];
 
-    // Hash the new password before saving it to the database
-    $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+    // Fetch current password and username from the database
+    $stmt = $connection->prepare("SELECT Password, Username FROM tbl4 WHERE Id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    // Update the record in the database
-    $stmtUpdate = $connection->prepare("UPDATE tbl SET Username = ?, Password = ? WHERE Id = ?");
-    $stmtUpdate->bind_param("ssi", $updateU, $hashedPassword, $updateId);
-    $sqlupdate = $stmtUpdate->execute();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $dbPassword = $row['Password']; // Remove hashing
+        $dbUsername = $row['Username'];
 
-    if ($sqlupdate) {
-        echo '<script>alert("Successfully Updated!")</script>';
-        echo '<script>window.location.href = "/phpRJB/Login.php"</script>'; // Redirect after update
+        // Verify the current password
+        if ($currentPassword === $dbPassword) { // Direct comparison
+            // Check if the username matches the one in the database
+            if ($username === $dbUsername) {
+                // Check if the new password and confirm password match
+                if ($newPassword === $confirmPassword) {
+                    // Update the password in the database without hashing
+                    $updateStmt = $connection->prepare("UPDATE tbl4 SET Password = ? WHERE Id = ?");
+                    $updateStmt->bind_param("si", $newPassword, $userId);
+
+                    if ($updateStmt->execute()) {
+                        echo '<script>alert("Password successfully changed!");</script>';
+                        echo '<script>window.location.href = "Login.php";</script>';
+                    } else {
+                        echo "Error updating the password.";
+                    }
+
+                    $updateStmt->close();
+                } else {
+                    echo "New password and confirm password do not match.";
+                }
+            } else {
+                echo "Username does not match.";
+            }
+        } else {
+            echo "Incorrect current password.";
+        }
     } else {
-        echo '<script>alert("Update failed. Please try again.")</script>';
+        echo "User not found.";
     }
+
+    $stmt->close();
 }
 ?>
 
@@ -45,103 +67,122 @@ if (isset($_POST['update'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <title>Edit Record</title>
+    <title>Change Password</title>
     <style>
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: Arial, sans-serif;
             background-color: black;
-            background-image: url('BG.png');
+            background-image: url('BP.jpg');
             background-size: cover;
-            width: 100%;
-            height: 10vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: auto;
-        }
-
-        * {
-            box-sizing: border-box;
+            height: 100vh;
+            margin: 0;
         }
 
         .container {
-            padding: 20px;
+            padding: 40px;
             background-color: rgba(255, 255, 255, 0.1);
             max-width: 400px;
             backdrop-filter: blur(10px);
-            margin: auto;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 20px;
-            position: center;
         }
 
-        input[type=text], input[type=email], input[type=password] {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0 15px 0;
-            display: inline-block;
-            border-radius: 15px;
-            background: #f1f1f1;
+        h1 {
+            color: white;
         }
 
-        input[type=text]:focus, input[type=email]:focus, input[type=password]:focus {
-            background-color: #ddd;
-            outline: none;
+        label {
+            color: white;
         }
 
-        hr {
-            border: 1px solid #f1f1f1;
+        .password-container {
+            position: relative;
             margin-bottom: 15px;
         }
 
-        .update {
+        input[type=password], input[type=text] {
+            width: 100%;
+            padding: 10px 40px 10px 10px;
+            margin: 5px 0;
+            display: inline-block;
+            background: #f1f1f1;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .emoji {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .change-password-btn {
             background-color: #04AA6D;
             color: white;
             padding: 12px 16px;
             margin: 8px 0;
             border: none;
+            border-radius: 20px;
             cursor: pointer;
             width: 100%;
             opacity: 0.9;
         }
 
-        .update:hover {
+        .change-password-btn:hover {
             opacity: 1;
         }
-
-        h1{
-            color: black;
-        }
-
-        p{
-            color: black;
-        }
-
-        a {
-            color: dodgerblue;
-        }
-
-        .signin {
-            background-color: #f1f1f1;
-            text-align: center;
-        }
     </style>
+    <script>
+        function togglePasswordVisibility(inputId, emojiId) {
+            const inputField = document.getElementById(inputId);
+            const emoji = document.getElementById(emojiId);
+            if (inputField.type === "password") {
+                inputField.type = "text";
+                emoji.textContent = "😃"; // Happy emoji when password is shown
+            } else {
+                inputField.type = "password";
+                emoji.textContent = "😐"; // Neutral emoji when password is hidden
+            }
+        }
+    </script>
 </head>
 <body>
-    <div class="container">
-        <h1>Edit Info</h1>
-        <br>
-        <form action="" method="post">
-            <input type="text" name="updateU" placeholder="Enter your Username" value="<?php echo htmlentities($editU) ?>" required/>
-            <br><br>
-            <input type="password" name="newPassword" placeholder="Enter new Password" required/>
-            <br><br>
-            <input type="submit" name="update" value="Update" id="update" class="btn btn-primary" /><br/>
-            <input type="hidden" name="updateId" value="<?php echo htmlentities($editId) ?>">
-        </form>
-    </div>
+
+<div class="container">
+    <h1>Change Password</h1>
+    <form method="POST" action="">
+        <label for="username"><b>Username</b></label>
+        <input type="text" name="username" id="username" placeholder="Enter your username" required>
+
+        <label for="currentPassword"><b>Current Password</b></label>
+        <div class="password-container">
+            <input type="password" name="currentPassword" id="currentPassword" placeholder="Enter current password" required>
+            <span id="emojiCurrent" class="emoji" onclick="togglePasswordVisibility('currentPassword', 'emojiCurrent')">😐</span>
+        </div>
+
+        <label for="newPassword"><b>New Password</b></label>
+        <div class="password-container">
+            <input type="password" name="newPassword" id="newPassword" placeholder="Enter new password" required>
+            <span id="emojiNew" class="emoji" onclick="togglePasswordVisibility('newPassword', 'emojiNew')">😐</span>
+        </div>
+
+        <label for="confirmPassword"><b>Confirm New Password</b></label>
+        <div class="password-container">
+            <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm new password" required>
+            <span id="emojiConfirm" class="emoji" onclick="togglePasswordVisibility('confirmPassword', 'emojiConfirm')">😐</span>
+        </div>
+
+        <button type="submit" name="changePassword" class="change-password-btn">Change Password</button>
+        <a href="Login.php">Go back</a>
+        
+    </form>
+</div>
+
 </body>
 </html>

@@ -128,6 +128,7 @@ if ($result->num_rows > 0) {
             <ul>
                 <li><a href="Data.php">Database</a></li>
                 <li><a href="Email.php">Email</a></li>
+                <li><a href="Update_Profile.php">Update Profile</a></li>
                 <li><a href="#">Terms & Conditions</a></li>
                 <li><a href="Login.php">Log Out</a></li>
             </ul>

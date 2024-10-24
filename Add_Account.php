@@ -21,7 +21,7 @@ if (isset($_POST['Registration'])) {
             $fileTmpPath = $_FILES['ProfilePicture']['tmp_name'];
             $fileName = $_FILES['ProfilePicture']['name'];
             $fileSize = $_FILES['ProfilePicture']['size'];
-            $allowedfileExtensions = array('jpg', 'jpeg', 'gif', 'png', 'bmp', 'webp');
+            $allowedfileExtensions = ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'webp'];
             $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
             if (in_array($fileExtension, $allowedfileExtensions) && $fileSize < 10000000) {
@@ -38,13 +38,13 @@ if (isset($_POST['Registration'])) {
             }
         }
 
-        // No password hashing, storing the plain password.
+        // Storing the plain password (consider hashing for security)
         $stmt = $connection->prepare("INSERT INTO tbl4 (Email, Username, Password, ProfilePicture, Role) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $Email, $Username, $Password, $fileName, $Role);
 
         if ($stmt->execute()) {
             echo '<script>alert("Successfully Registered!");</script>';
-            echo '<script>window.location.href = "index.php";</script>'; // Redirect updated to match first code
+            echo '<script>window.location.href = "Add_Account.php";</script>';
         } else {
             echo "Error saving your data.";
         }
@@ -55,15 +55,15 @@ if (isset($_POST['Registration'])) {
 
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Add Account</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
-            background: url('BP.jpg') no-repeat center center fixed;
+            background-color: black;
+            background-image: url('BP.jpg');
             background-size: cover;
-            display: flex;
             width: 100%;
             height: 100vh;
             display: flex;
@@ -141,7 +141,7 @@ if (isset($_POST['Registration'])) {
 
 <body>
     <div class="container">
-        <h1>Sign up</h1>
+        <h1>Add Account</h1>
         <p>Please fill in this form.</p>
         <hr>
         <form method="POST" enctype="multipart/form-data" id="registrationForm">
@@ -167,16 +167,15 @@ if (isset($_POST['Registration'])) {
         
             <label for="Role"><b>User Role</b></label>
             <select name="Role" id="Role">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
             </select>
 
             <input type="checkbox" onclick="togglePassword()">Show Password
             <hr>
-            <p>By registering here you need to agree to our <a href="T&C.php">Terms & Conditions</a>.</p>
-            <p>Already have Account?<a href="Login.php">Log In</a>.</p>
 
             <button type="submit" name="Registration" class="flex-registerbtn">Register</button>
+            <button class="go-back" onclick="window.location.href='Home.php';">Go Back</button>
         </form>
     </div>
 
@@ -216,5 +215,4 @@ if (isset($_POST['Registration'])) {
         });
     </script>
 </body>
-
 </html>

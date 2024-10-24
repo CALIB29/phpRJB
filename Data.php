@@ -77,75 +77,174 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $role === 'admin') {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <title>Document</title>
+    <title>User Dashboard</title>
     <style>
+        body {
+            background-color: #f4f4f9;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h3 {
+            color: #333;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h3 {
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus {
+            border-color: #007BFF;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .btn-primary {
+            background-color: #007BFF;
+            border-color: #007BFF;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+        }
+
+        td {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .printButton {
+            display: inline-block;
+            width: 140px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(to right, #77530a, #ffd277);
+            color: #ffd277;
+            cursor: pointer;
+            text-align: center;
+            line-height: 40px;
+            transition: background-position 0.5s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .printButton:hover {
+            background-position: right;
+        }
+
+        .back-button {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #007BFF;
+            text-decoration: none;
+        }
+
         @media print {
             #printButton {
                 display: none;
             }
         }
 
-        .printButton {
-            width: 140px;
-            height: 40px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(to right, #77530a, #ffd277, #77530a, #77530a, #ffd277, #77530a);
-            background-size: 250%;
-            background-position: left;
-            color: #ffd277;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition-duration: 1s;
-            overflow: hidden;
-        }
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
 
-        .printButton::before {
-            position: absolute;
-            content: "Print";
-            color: #ffd277;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 97%;
-            height: 90%;
-            border-radius: 8px;
-            transition-duration: 1s;
-            background-color: rgba(0, 0, 0, 0.842);
-            background-size: 200%;
-        }
-
-        .printButton:hover {
-            background-position: right;
-            transition-duration: 1s;
-        }
-
-        .printButton:hover::before {
-            background-position: right;
-            transition-duration: 1s;
-        }
-
-        .printButton:active {
-            transform: scale(0.95);
+            h1 {
+                font-size: 2rem;
+            }
         }
     </style>
+    <script>
+        function printUserData(id, firstName, middleName, lastName, profilePicture) {
+            const printWindow = window.open('', '_blank', 'width=600,height=400');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>User Info</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; }
+                            h1 { text-align: center; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>User Information</h1>
+                        <table>
+                            <tr><th>ID</th><td>${id}</td></tr>
+                            <tr><th>Firstname</th><td>${firstName}</td></tr>
+                            <tr><th>Middlename</th><td>${middleName}</td></tr>
+                            <tr><th>Lastname</th><td>${lastName}</td></tr>
+                            <tr><th>Profile Picture</th><td><img src="${profilePicture}" style="width: 100px; height: auto;"></td></tr>
+                        </table>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    </script>
 </head>
-
 <body>
     <div class="container">
-
         <h1>Welcome, <?php echo htmlspecialchars($username); ?>!</h1>
-        <br>
 
         <?php if ($role === 'admin'): ?>
             <!-- Admin-specific content (CRUD form) -->
@@ -195,15 +294,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $role === 'admin') {
                                 <input type="submit" name="delete" value="DELETE" class="btn btn-danger" style="width: 80px">
                                 <input type="hidden" name="deleteId" value="<?php echo $results['Id'] ?>">
                             </form>
+                            <button class="printButton" onclick="printUserData('<?php echo $results['Id'] ?>', '<?php echo htmlspecialchars($results['Firstname']) ?>', '<?php echo htmlspecialchars($results['Middlename']) ?>', '<?php echo htmlspecialchars($results['Lastname']) ?>', '<?php echo htmlspecialchars($results['ProfilePicture']) ?>')">PRINT</button>
                         </td>
                     <?php endif; ?>
                 </tr>
             <?php } ?>
         </table>
 
-        <button id="printButton" class="printButton" onclick="window.print()">Print</button>
-        <a href="Home.php">Back</a>
+        <a href="Home.php" class="back-button">Back</a>
     </div>
 </body>
-
 </html>

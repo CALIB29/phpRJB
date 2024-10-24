@@ -16,13 +16,13 @@ function sendMail($email, $subject, $message) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';  
         $mail->SMTPAuth = true;
-        $mail->Username = 'raphbutial29@gmail.com';  // Your email
-        $mail->Password = 'ksiqjsdpnzwpxwlq';      // Your app password if 2FA is enabled
+        $mail->Username = 'calibutial20@gmail.com';  // Your email
+        $mail->Password = 'ugoduoybbaalydjd';      // Your app password if 2FA is enabled
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
         // Sender and recipient settings
-        $mail->setFrom('raphbutial29@gmail.com', 'Raph Justine B. Butial');
+        $mail->setFrom('calibutial20@gmail.com', 'Raph Justine B. Butial');
         $mail->addAddress($email); 
 
         // Email content
@@ -37,13 +37,6 @@ function sendMail($email, $subject, $message) {
         return "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
 }
-?>
-
-
-
-<?php
-// Ensure you include the file that defines sendMail
-
 
 // Check if the form is submitted
 if (isset($_POST['submit'])) {
@@ -65,19 +58,25 @@ if (isset($_POST['submit'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        /* Add your styles here */
+        /* General styling */
         body {
             background-color: #f7f7f7;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
         }
 
         .email-container {
             margin: 50px auto;
-            width: 50%;
+            max-width: 600px;
             padding: 20px;
             background-color: #fff;
-            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
+            transition: transform 0.3s;
+        }
+
+        .email-container:hover {
+            transform: scale(1.01); /* Scale effect on hover */
         }
 
         .form-group {
@@ -88,6 +87,12 @@ if (isset($_POST['submit'])) {
             border: 2px solid #ccc;
             border-radius: 4px;
             padding: 12px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #007BFF; /* Focus border color */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Focus shadow */
         }
 
         .btn-submit {
@@ -98,10 +103,12 @@ if (isset($_POST['submit'])) {
             border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
         }
 
         .btn-submit:hover {
             background-color: #218838;
+            transform: translateY(-2px); /* Slight lift on hover */
         }
 
         .form-header {
@@ -112,6 +119,19 @@ if (isset($_POST['submit'])) {
         .form-header h2 {
             font-size: 28px;
             color: #333;
+        }
+
+        .response-message {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .text-success {
+            color: #28a745;
+        }
+
+        .text-danger {
+            color: #dc3545;
         }
 
         @media screen and (max-width: 768px) {
@@ -149,12 +169,16 @@ if (isset($_POST['submit'])) {
         </div>
 
         <?php if (isset($response)) : ?>
-            <p class="<?= $response == 'success' ? 'text-success' : 'text-danger'; ?>">
-                <?= $response == 'success' ? 'Email sent successfully.' : $response; ?>
-            </p>
+            <div class="response-message">
+                <p class="<?= $response == 'success' ? 'text-success' : 'text-danger'; ?>">
+                    <?= $response == 'success' ? 'Email sent successfully.' : $response; ?>
+                </p>
+            </div>
         <?php endif; ?>
     </form>
-    <a href="Home.php">Back</a>
+    <div class="text-center">
+        <a href="Home.php" class="btn btn-secondary">Back</a>
+    </div>
 </div>
 
 </body>
